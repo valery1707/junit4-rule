@@ -8,8 +8,10 @@
 	<artifactId>junit4-rule</artifactId>
 	<version>0.1.1-SNAPSHOT</version>
 
-	<name></name>
-	<description></description>
+	<name>Extension library for JUnit 4</name>
+	<description>
+		Add new [Rules](https://github.com/junit-team/junit4/wiki/Rules) for JUnit4.
+	</description>
 	<url>https://github.com/valery1707/junit4-rule</url>
 	<inceptionYear>2018</inceptionYear>
 
