@@ -13,17 +13,13 @@ import java.math.RoundingMode;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static name.valery1707.junit.rule.ConditionalIgnoreRule.INVALID_CLASS_CTOR;
+import static name.valery1707.junit.rule.ConditionalIgnoreRule.INVALID_CLASS_DECLARATION;
 import static name.valery1707.junit.rule.utils.TestResult.runTest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ConditionalIgnoreRuleTest {
-	public static class AlwaysSkipCondition implements IgnoreCondition {
-		@Override
-		public boolean needSkip() {
-			return true;
-		}
-	}
-
+	//region OnlySkip
 	public static class OnlySkipTest {
 		@Rule
 		public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
@@ -31,11 +27,13 @@ public class ConditionalIgnoreRuleTest {
 		@Test
 		@ConditionalIgnore(condition = AlwaysSkipCondition.class)
 		public void test1() {
+			assertThat("Blank").isNotBlank();
 		}
 
 		@Test
 		@ConditionalIgnore(condition = AlwaysSkipCondition.class)
 		public void test2() {
+			assertThat("Blank").isNotBlank();
 		}
 	}
 
@@ -59,14 +57,9 @@ public class ConditionalIgnoreRuleTest {
 			.containsOnlyKeys("test1", "test2")
 		;
 	}
+	//endregion
 
-	public static class AlwaysRunCondition implements IgnoreCondition {
-		@Override
-		public boolean needRun() {
-			return true;
-		}
-	}
-
+	//region OnlyRun
 	public static class OnlyRunTest {
 		@Rule
 		public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
@@ -74,11 +67,13 @@ public class ConditionalIgnoreRuleTest {
 		@Test
 		@ConditionalIgnore(condition = AlwaysRunCondition.class)
 		public void test1() {
+			assertThat("Blank").isNotBlank();
 		}
 
 		@Test
 		@ConditionalIgnore(condition = AlwaysRunCondition.class)
 		public void test2() {
+			assertThat("Blank").isNotBlank();
 		}
 	}
 
@@ -102,28 +97,34 @@ public class ConditionalIgnoreRuleTest {
 			.isEmpty()
 		;
 	}
+	//endregion
 
+	//region Mixed
 	public static class MixedTest {
 		@Rule
 		public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
 
 		@Test
 		public void alwaysRun() {
+			assertThat("Blank").isNotBlank();
 		}
 
 		@Test
 		@ConditionalIgnore(condition = AlwaysRunCondition.class)
 		public void runByRule() {
+			assertThat("Blank").isNotBlank();
 		}
 
 		@Test
 		@ConditionalIgnore(condition = AlwaysSkipCondition.class)
 		public void skipByRule() {
+			assertThat("Blank").isNotBlank();
 		}
 
 		@Test
 		@Ignore
 		public void alwaysSkip() {
+			assertThat("Blank").isNotBlank();
 		}
 
 		@Test
@@ -152,9 +153,11 @@ public class ConditionalIgnoreRuleTest {
 			.containsOnlyKeys("skipByRule")
 		;
 	}
+	//endregion
 
+	//region SkipWithReason
 	public static class SkipWithReasonCondition implements IgnoreCondition {
-		static final String MESSAGE = "because I can";
+		private static final String MESSAGE = "because I can";
 
 		@Override
 		public boolean needRun() {
@@ -168,19 +171,20 @@ public class ConditionalIgnoreRuleTest {
 		}
 	}
 
-	public static class IgnoreWithReasonTest {
+	public static class SkipWithReasonTest {
 		@Rule
 		public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
 
 		@Test
 		@ConditionalIgnore(condition = SkipWithReasonCondition.class)
 		public void test() {
+			assertThat("Blank").isNotBlank();
 		}
 	}
 
 	@Test
-	public void testIgnoreWithReason() {
-		TestResult result = runTest(IgnoreWithReasonTest.class);
+	public void testSkipWithReason() {
+		TestResult result = runTest(SkipWithReasonTest.class);
 		assertThat(result.getFailures())
 			.describedAs("failures")
 			.isEmpty()
@@ -201,7 +205,9 @@ public class ConditionalIgnoreRuleTest {
 			)
 		;
 	}
+	//endregion
 
+	//region NonStaticOuter
 	public class NonStaticOuterCondition implements IgnoreCondition {
 		@Override
 		public boolean needSkip() {
@@ -222,15 +228,21 @@ public class ConditionalIgnoreRuleTest {
 		@Test
 		@ConditionalIgnore(condition = NonStaticOuterCondition.class)
 		public void test() {
+			assertThat("Blank").isNotBlank();
 		}
 	}
 
 	@Test
-	public void testNonStaticIncorrect() {
+	public void testNonStaticOuter() {
 		TestResult result = runTest(NonStaticIncorrectTest.class);
 		assertThat(result.getFailures())
 			.describedAs("failures")
-			.isEmpty()
+			.containsOnlyKeys("NonStaticIncorrectTest")
+			.hasEntrySatisfying("NonStaticIncorrectTest", failure ->
+				assertThat(failure.getMessage()).isEqualTo(
+					String.format(INVALID_CLASS_DECLARATION, NonStaticOuterCondition.class.getName())
+				)
+			)
 		;
 		assertThat(result.getCompleted())
 			.describedAs("completed")
@@ -244,20 +256,21 @@ public class ConditionalIgnoreRuleTest {
 			.describedAs("ignoredByAssumption")
 			.isEmpty()
 		;
-		//todo Catch exception
 	}
+	//endregion
 
-	public static class NonStaticCorrectTest {
+	//region NonStaticInner
+	public static class NonStaticInnerTest {
 		private static final BigDecimal RND = new Random()
 			.doubles()
 			.limit(3)
 			.mapToObj(BigDecimal::new)
 			.reduce(BigDecimal.ZERO, BigDecimal::add)
 			.setScale(5, RoundingMode.CEILING);
-		static final AtomicReference<BigDecimal> VALUE = new AtomicReference<>();
+		private static final AtomicReference<BigDecimal> VALUE = new AtomicReference<>();
 		private final BigDecimal rnd;
 
-		public NonStaticCorrectTest() {
+		public NonStaticInnerTest() {
 			this.rnd = RND;
 		}
 
@@ -280,6 +293,7 @@ public class ConditionalIgnoreRuleTest {
 		@Test
 		@ConditionalIgnore(condition = NonStaticCondition.class)
 		public void ignored() {
+			assertThat("Blank").isNotBlank();
 		}
 
 		@Test
@@ -289,8 +303,8 @@ public class ConditionalIgnoreRuleTest {
 	}
 
 	@Test
-	public void testNonStaticCorrect() {
-		TestResult result = runTest(NonStaticCorrectTest.class);
+	public void testNonStaticInner() {
+		TestResult result = runTest(NonStaticInnerTest.class);
 		assertThat(result.getFailures())
 			.describedAs("failures")
 			.isEmpty()
@@ -303,16 +317,18 @@ public class ConditionalIgnoreRuleTest {
 			.describedAs("ignoredTotally")
 			.isEmpty()
 		;
-		assertThat(NonStaticCorrectTest.VALUE.get()).isNotNull();
+		assertThat(NonStaticInnerTest.VALUE.get()).isNotNull();
 		assertThat(result.getIgnoredByAssumption())
 			.describedAs("ignoredByAssumption")
 			.containsOnlyKeys("ignored")
 			.hasEntrySatisfying("ignored", failure ->
-				assertThat(failure.getMessage()).endsWith(NonStaticCorrectTest.VALUE.get().toEngineeringString())
+				assertThat(failure.getMessage()).endsWith(NonStaticInnerTest.VALUE.get().toEngineeringString())
 			)
 		;
 	}
+	//endregion
 
+	//region Repeatable
 	public static class RepeatableTest {
 		@Rule
 		public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
@@ -321,24 +337,28 @@ public class ConditionalIgnoreRuleTest {
 		@ConditionalIgnore(condition = AlwaysRunCondition.class)
 		@ConditionalIgnore(condition = AlwaysRunCondition.class)
 		public void runAndRun() {
+			assertThat("Blank").isNotBlank();
 		}
 
 		@Test
 		@ConditionalIgnore(condition = AlwaysRunCondition.class)
 		@ConditionalIgnore(condition = AlwaysSkipCondition.class)
 		public void runAndSkip() {
+			assertThat("Blank").isNotBlank();
 		}
 
 		@Test
 		@ConditionalIgnore(condition = AlwaysSkipCondition.class)
 		@ConditionalIgnore(condition = AlwaysRunCondition.class)
 		public void skipAndRun() {
+			assertThat("Blank").isNotBlank();
 		}
 
 		@Test
 		@ConditionalIgnore(condition = AlwaysSkipCondition.class)
 		@ConditionalIgnore(condition = AlwaysSkipCondition.class)
 		public void skipAndSkip() {
+			assertThat("Blank").isNotBlank();
 		}
 	}
 
@@ -362,4 +382,154 @@ public class ConditionalIgnoreRuleTest {
 			.containsOnlyKeys("runAndSkip", "skipAndRun", "skipAndSkip")
 		;
 	}
+	//endregion
+
+	//region ConstructorWithError
+	public static class ConstructorWithErrorCondition implements IgnoreCondition {
+		public ConstructorWithErrorCondition() {
+			throw new IllegalStateException("Some unchecked exception");
+		}
+
+		@Override
+		public boolean needRun() {
+			return true;
+		}
+	}
+
+	public static class ConstructorWithErrorTest {
+		@Rule
+		public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
+
+		@Test
+		@ConditionalIgnore(condition = ConstructorWithErrorCondition.class)
+		public void test() {
+			assertThat("Blank").isNotBlank();
+		}
+	}
+
+	@Test
+	public void testConstructorWithError() {
+		TestResult result = runTest(ConstructorWithErrorTest.class);
+		assertThat(result.getFailures())
+			.describedAs("failures")
+			.containsOnlyKeys("ConstructorWithErrorTest")
+			.hasEntrySatisfying("ConstructorWithErrorTest", failure ->
+				assertThat(failure.getMessage()).isEqualTo("Some unchecked exception")
+			)
+		;
+		assertThat(result.getCompleted())
+			.describedAs("completed")
+			.isEmpty()
+		;
+		assertThat(result.getIgnoredTotally())
+			.describedAs("ignoredTotally")
+			.isEmpty()
+		;
+		assertThat(result.getIgnoredByAssumption())
+			.describedAs("ignoredByAssumption")
+			.isEmpty()
+		;
+	}
+	//endregion
+
+	//region ConstructorHidden
+	public static class ConstructorHiddenCondition implements IgnoreCondition {
+		private ConstructorHiddenCondition() {
+		}
+
+		@Override
+		public boolean needRun() {
+			return true;
+		}
+	}
+
+	public static class ConstructorHiddenTest {
+		@Rule
+		public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
+
+		@Test
+		@ConditionalIgnore(condition = ConstructorHiddenCondition.class)
+		public void test() {
+			assertThat("Blank").isNotBlank();
+		}
+	}
+
+	@Test
+	public void testConstructorHidden() {
+		TestResult result = runTest(ConstructorHiddenTest.class);
+		assertThat(result.getFailures())
+			.describedAs("failures")
+			.containsOnlyKeys("ConstructorHiddenTest")
+			.hasEntrySatisfying("ConstructorHiddenTest", failure ->
+				assertThat(failure.getMessage()).isEqualTo(
+					String.format(INVALID_CLASS_CTOR, ConstructorHiddenCondition.class.getName())
+				)
+			)
+		;
+		assertThat(result.getCompleted())
+			.describedAs("completed")
+			.isEmpty()
+		;
+		assertThat(result.getIgnoredTotally())
+			.describedAs("ignoredTotally")
+			.isEmpty()
+		;
+		assertThat(result.getIgnoredByAssumption())
+			.describedAs("ignoredByAssumption")
+			.isEmpty()
+		;
+	}
+	//endregion
+
+	//region ConstructorWithArguments
+	public static class ConstructorWithArgumentsCondition implements IgnoreCondition {
+		private final String value;
+
+		public ConstructorWithArgumentsCondition(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public boolean needRun() {
+			return value != null;
+		}
+	}
+
+	public static class ConstructorWithArgumentsTest {
+		@Rule
+		public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
+
+		@Test
+		@ConditionalIgnore(condition = ConstructorWithArgumentsCondition.class)
+		public void test() {
+			assertThat("Blank").isNotBlank();
+		}
+	}
+
+	@Test
+	public void testConstructorWithArguments() {
+		TestResult result = runTest(ConstructorWithArgumentsTest.class);
+		assertThat(result.getFailures())
+			.describedAs("failures")
+			.containsOnlyKeys("ConstructorWithArgumentsTest")
+			.hasEntrySatisfying("ConstructorWithArgumentsTest", failure ->
+				assertThat(failure.getMessage()).isEqualTo(
+					String.format(INVALID_CLASS_CTOR, ConstructorWithArgumentsCondition.class.getName())
+				)
+			)
+		;
+		assertThat(result.getCompleted())
+			.describedAs("completed")
+			.isEmpty()
+		;
+		assertThat(result.getIgnoredTotally())
+			.describedAs("ignoredTotally")
+			.isEmpty()
+		;
+		assertThat(result.getIgnoredByAssumption())
+			.describedAs("ignoredByAssumption")
+			.isEmpty()
+		;
+	}
+	//endregion
 }

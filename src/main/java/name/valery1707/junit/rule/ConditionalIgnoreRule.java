@@ -37,6 +37,14 @@ import java.util.stream.Stream;
  * @see <a href="https://gist.github.com/rherrmann/7447571">Starting point</a>
  */
 public class ConditionalIgnoreRule implements MethodRule {
+	protected static final String INVALID_CLASS_DECLARATION
+		= "Conditional class '%s' is a member class but was not declared inside the test case using it.\n"
+		+ "Either make this class a static class, standalone class (by declaring it in it's own file) "
+		+ "or move it inside the test case using it";
+
+	protected static final String INVALID_CLASS_CTOR
+		= "Fail to instantiate class %s";
+
 	private static <A extends Annotation> Stream<A> annotation(Annotatable source, Class<A> type) {
 		return Stream
 			.of(source.getAnnotation(type))
@@ -65,15 +73,9 @@ public class ConditionalIgnoreRule implements MethodRule {
 	private IgnoreCondition createCondition(Object target, ConditionalIgnore annotation) {
 		Class<? extends IgnoreCondition> type = annotation.condition();
 		boolean isStandalone = !type.isMemberClass() || Modifier.isStatic(type.getModifiers());
-		boolean isDeclaredInTarget = target.getClass().isAssignableFrom(type.getDeclaringClass());
+		boolean isDeclaredInTarget = type.getDeclaringClass() != null && target.getClass().isAssignableFrom(type.getDeclaringClass());
 		if (!isStandalone && !isDeclaredInTarget) {
-			String msg
-				= "Conditional class '%s' is a member class "
-				+ "but was not declared inside the test case using it.\n"
-				+ "Either make this class a static class, "
-				+ "standalone class (by declaring it in it's own file) "
-				+ "or move it inside the test case using it";
-			throw new IllegalArgumentException(String.format(msg, type.getName()));
+			throw new IllegalArgumentException(String.format(INVALID_CLASS_DECLARATION, type.getName()));
 		}
 		try {
 			if (isStandalone) {
@@ -81,10 +83,10 @@ public class ConditionalIgnoreRule implements MethodRule {
 			} else {
 				return type.getDeclaredConstructor(target.getClass()).newInstance(target);
 			}
-		} catch (RuntimeException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		} catch (RuntimeException rethrow) {
+			throw rethrow;
+		} catch (Exception cause) {
+			throw new IllegalArgumentException(String.format(INVALID_CLASS_CTOR, type.getName()), cause);
 		}
 	}
 

@@ -114,7 +114,17 @@ public class TestResult {
 
 		@Override
 		public void testFailure(Failure failure) {
-			failures.put(failure.getDescription().getMethodName(), failure);
+			String name = failure.getDescription().getMethodName();
+			if (name == null) {
+				String className = failure.getDescription().getClassName();
+				if (className.contains("$")) {
+					className = className.substring(className.lastIndexOf('$') + 1);
+				} else {
+					className = className.substring(className.lastIndexOf('.') + 1);
+				}
+				name = className;
+			}
+			failures.put(name, failure);
 		}
 
 		@Override
