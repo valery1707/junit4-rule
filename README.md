@@ -3,6 +3,7 @@
 
 [![codecov](https://codecov.io/gh/valery1707/junit4-rule/branch/master/graph/badge.svg)](https://codecov.io/gh/valery1707/junit4-rule)
 [![Coverage Status](https://coveralls.io/repos/github/valery1707/junit4-rule/badge.svg?branch=master)](https://coveralls.io/github/valery1707/junit4-rule?branch=master)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/38fc5e4c5eb14452bc8c67ba71738aef)](https://www.codacy.com/app/valery1707/junit4-rule?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=valery1707/junit4-rule&amp;utm_campaign=Badge_Grade)
 
 [![Build Status](https://travis-ci.org/valery1707/junit4-rule.svg?branch=master)](https://travis-ci.org/valery1707/junit4-rule)
 [![Build status](https://ci.appveyor.com/api/projects/status/lk3519k9dlw87kpx/branch/master?svg=true)](https://ci.appveyor.com/project/valery1707/junit4-rule/branch/master)
