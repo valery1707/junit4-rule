@@ -8,7 +8,12 @@ import org.junit.runners.model.Statement;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.annotation.*;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -106,6 +111,11 @@ public class ConditionalIgnoreRule implements MethodRule {
 	@Target({ElementType.METHOD})
 	@Repeatable(ConditionalIgnoreList.class)
 	public @interface ConditionalIgnore {
+		/**
+		 * Link to {@link IgnoreCondition} implementation.
+		 *
+		 * @return Class with {@link IgnoreCondition} implementation
+		 */
 		Class<? extends IgnoreCondition> condition();
 	}
 
@@ -126,6 +136,8 @@ public class ConditionalIgnoreRule implements MethodRule {
 	 */
 	public interface IgnoreCondition {
 		/**
+		 * Check to skip test.
+		 *
 		 * @return Is test need to skip?
 		 */
 		default boolean needSkip() {
@@ -133,6 +145,8 @@ public class ConditionalIgnoreRule implements MethodRule {
 		}
 
 		/**
+		 * Check to allow test to run.
+		 *
 		 * @return Is test need to run?
 		 */
 		default boolean needRun() {
@@ -140,6 +154,8 @@ public class ConditionalIgnoreRule implements MethodRule {
 		}
 
 		/**
+		 * Description of skipping test.
+		 *
 		 * @return Description of skipping test
 		 */
 		@Nullable
