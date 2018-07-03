@@ -2,6 +2,7 @@
 [![License](https://img.shields.io/github/license/valery1707/junit4-rule.svg)](http://opensource.org/licenses/MIT)
 
 [![codecov](https://codecov.io/gh/valery1707/junit4-rule/branch/master/graph/badge.svg)](https://codecov.io/gh/valery1707/junit4-rule)
+[![Coverage Status](https://coveralls.io/repos/github/valery1707/junit4-rule/badge.svg?branch=master)](https://coveralls.io/github/valery1707/junit4-rule?branch=master)
 
 [![Build Status](https://travis-ci.org/valery1707/junit4-rule.svg?branch=master)](https://travis-ci.org/valery1707/junit4-rule)
 [![Build status](https://ci.appveyor.com/api/projects/status/lk3519k9dlw87kpx/branch/master?svg=true)](https://ci.appveyor.com/project/valery1707/junit4-rule/branch/master)
