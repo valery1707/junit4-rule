@@ -23,3 +23,6 @@ You can ignore test by custom rule only in 3 steps:
 1. Add annotation `name.valery1707.junit.rule.ConditionalIgnoreRule.ConditionalIgnore` with condition created at first step
 
 Conditions can be reused by many test methods and ever test classes.
+
+Base implementations of conditionals:
+* `BaseEnvironmentCondition` - test of environment values by regexp or simple equals

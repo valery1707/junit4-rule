@@ -3,6 +3,7 @@ Change log for releases.
 # SNAPSHOT
 
 * Repeatable usage of `@ConditionalIgnore`
+* Add base implementation condition for test environment values 
 
 # 0.1.2
 

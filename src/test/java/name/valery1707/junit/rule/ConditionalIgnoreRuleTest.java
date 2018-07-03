@@ -270,6 +270,9 @@ public class ConditionalIgnoreRuleTest {
 		private static final AtomicReference<BigDecimal> VALUE = new AtomicReference<>();
 		private final BigDecimal rnd;
 
+		@Rule
+		public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
+
 		public NonStaticInnerTest() {
 			this.rnd = RND;
 		}
@@ -286,9 +289,6 @@ public class ConditionalIgnoreRuleTest {
 				return "inner value = " + rnd.toEngineeringString();
 			}
 		}
-
-		@Rule
-		public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
 
 		@Test
 		@ConditionalIgnore(condition = NonStaticCondition.class)
