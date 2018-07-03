@@ -2,16 +2,16 @@ package name.valery1707.junit.rule;
 
 import org.junit.Assume;
 import org.junit.rules.MethodRule;
+import org.junit.runners.model.Annotatable;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 import java.lang.reflect.Modifier;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * Rule for ignore test by custom externalized predicates.
@@ -32,16 +32,28 @@ import java.lang.reflect.Modifier;
  * @see <a href="https://gist.github.com/rherrmann/7447571">Starting point</a>
  */
 public class ConditionalIgnoreRule implements MethodRule {
+	private static <A extends Annotation> Stream<A> annotation(Annotatable source, Class<A> type) {
+		return Stream
+			.of(source.getAnnotation(type))
+			.filter(Objects::nonNull);
+	}
+
+	private static Stream<ConditionalIgnore> annotations(Annotatable source) {
+		return Stream.concat(
+			annotation(source, ConditionalIgnore.class),
+			annotation(source, ConditionalIgnoreList.class).map(ConditionalIgnoreList::value).flatMap(Stream::of)
+		);
+	}
+
 	@Override
 	public Statement apply(Statement base, FrameworkMethod method, Object target) {
-		ConditionalIgnore annotation = method.getAnnotation(ConditionalIgnore.class);
-		if (annotation != null) {
-			IgnoreCondition condition = createCondition(target, annotation);
-			if (condition.needSkip()) {
-				return new IgnoreStatement(condition);
-			}
-		}
-		return base;
+		return annotations(method)
+			.map(annotation -> createCondition(target, annotation))
+			.filter(IgnoreCondition::needSkip)
+			.findFirst()
+			.map(IgnoreStatement::new)
+			.map(__ -> (Statement) __)
+			.orElse(base);
 	}
 
 	@Nonnull
@@ -92,9 +104,15 @@ public class ConditionalIgnoreRule implements MethodRule {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ElementType.METHOD})
+	@Repeatable(ConditionalIgnoreList.class)
 	public @interface ConditionalIgnore {
-		//todo Multiply usage with skip if any of rule say to skip
 		Class<? extends IgnoreCondition> condition();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ElementType.METHOD})
+	@interface ConditionalIgnoreList {
+		ConditionalIgnore[] value();
 	}
 
 	/**
