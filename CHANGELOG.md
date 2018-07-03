@@ -2,6 +2,8 @@ Change log for releases.
 
 # SNAPSHOT
 
+* Repeatable usage of `@ConditionalIgnore`
+
 # 0.1.2
 
 * First public release

@@ -312,4 +312,54 @@ public class ConditionalIgnoreRuleTest {
 			)
 		;
 	}
+
+	public static class RepeatableTest {
+		@Rule
+		public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
+
+		@Test
+		@ConditionalIgnore(condition = AlwaysRunCondition.class)
+		@ConditionalIgnore(condition = AlwaysRunCondition.class)
+		public void runAndRun() {
+		}
+
+		@Test
+		@ConditionalIgnore(condition = AlwaysRunCondition.class)
+		@ConditionalIgnore(condition = AlwaysSkipCondition.class)
+		public void runAndSkip() {
+		}
+
+		@Test
+		@ConditionalIgnore(condition = AlwaysSkipCondition.class)
+		@ConditionalIgnore(condition = AlwaysRunCondition.class)
+		public void skipAndRun() {
+		}
+
+		@Test
+		@ConditionalIgnore(condition = AlwaysSkipCondition.class)
+		@ConditionalIgnore(condition = AlwaysSkipCondition.class)
+		public void skipAndSkip() {
+		}
+	}
+
+	@Test
+	public void testRepeatable() {
+		TestResult result = runTest(RepeatableTest.class);
+		assertThat(result.getFailures())
+			.describedAs("failures")
+			.isEmpty()
+		;
+		assertThat(result.getCompleted())
+			.describedAs("completed")
+			.containsOnlyKeys("runAndRun", "runAndSkip", "skipAndRun", "skipAndSkip")
+		;
+		assertThat(result.getIgnoredTotally())
+			.describedAs("ignoredTotally")
+			.isEmpty()
+		;
+		assertThat(result.getIgnoredByAssumption())
+			.describedAs("ignoredByAssumption")
+			.containsOnlyKeys("runAndSkip", "skipAndRun", "skipAndSkip")
+		;
+	}
 }
