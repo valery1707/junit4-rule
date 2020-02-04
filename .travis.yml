@@ -3,8 +3,6 @@ language: java
 sudo: false # faster builds
 
 jdk:
-  - oraclejdk8
-  - oraclejdk9
   - openjdk8
 
 script:
