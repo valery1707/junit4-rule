@@ -8,9 +8,9 @@ jdk:
   - openjdk8
 
 script:
-  - mvn clean verify
+  - ./mvnw clean verify -B -V
 
 after_success:
   - python <(curl -s https://raw.githubusercontent.com/TouK/sputnik-ci/master/sputnik-ci.py)
   - bash <(curl -s https://codecov.io/bash)
-  - mvn coveralls:report
+  - ./mvnw coveralls:report
