@@ -21,11 +21,9 @@ install:
   - cmd: SET PATH=%M2_HOME%\bin;%JAVA_HOME%\bin;%PATH:C:\Ruby193\bin;=%
   - cmd: SET MAVEN_OPTS=-XX:MaxPermSize=1g -Xmx2g
   - cmd: SET JAVA_OPTS=-XX:MaxPermSize=1g -Xmx2g
-  - cmd: mvn --version
-  - cmd: java -version
 
 build_script:
-  - mvn --batch-mode clean verify
+  - ./mvnw clean verify -B -V
 
 cache:
   - C:\maven\ -> appveyor.yml
