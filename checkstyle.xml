@@ -27,10 +27,6 @@ Source: https://github.com/checkstyle/checkstyle/blob/checkstyle-8.11/src/main/r
 			<property name="allowByTailComment" value="true"/>
 			<property name="allowNonPrintableEscapes" value="true"/>
 		</module>
-		<module name="LineLength">
-			<property name="max" value="160"/>
-			<property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
-		</module>
 		<module name="AvoidStarImport"/>
 		<module name="OneTopLevelClass"/>
 		<module name="NoLineWrap"/>
@@ -223,12 +219,10 @@ Source: https://github.com/checkstyle/checkstyle/blob/checkstyle-8.11/src/main/r
 		</module>
 		<module name="JavadocMethod">
 			<property name="scope" value="public"/>
+			<property name="validateThrows" value="false"/>
 			<property name="allowMissingParamTags" value="true"/>
-			<property name="allowMissingThrowsTags" value="true"/>
 			<property name="allowMissingReturnTag" value="true"/>
-			<property name="minLineCount" value="2"/>
 			<property name="allowedAnnotations" value="Override, Test"/>
-			<property name="allowThrowsTagsForSubclasses" value="true"/>
 		</module>
 		<module name="MethodName">
 			<property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9_]*$"/>
@@ -242,5 +236,10 @@ Source: https://github.com/checkstyle/checkstyle/blob/checkstyle-8.11/src/main/r
 			<property name="exceptionVariableName" value="expected"/>
 		</module>
 		<module name="CommentsIndentation"/>
+	</module>
+
+	<module name="LineLength">
+		<property name="max" value="160"/>
+		<property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
 	</module>
 </module>
